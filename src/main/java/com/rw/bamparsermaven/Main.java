@@ -62,7 +62,7 @@ public class Main {
             formatter.printHelp("Must provide either n cells to use (-n) or cellranger tsv file(-t)", options);
             System.exit(1);
         }
-        new Parser(inFile, outFile, tsvFile, nCells, cmd.hasOption("x")).parse();
+        new Parser(inFile, outFile, tsvFile, nCells).parse();
     }
 
     /**
@@ -98,12 +98,6 @@ public class Main {
                         + "supply this or the 10x tsv file with the list of cell BCs\n"
                         + "bam file contains all barcodes also from drops without cells").
                 numberOfArgs(1)
-                .build());
-          options.addOption(Option.builder("x")
-                 .longOpt("xml")
-                .required(false)
-                .desc("output xml file, gets pretty big and xml generation slows down program")
-                .hasArg(false)
                 .build());
         return options;
     }

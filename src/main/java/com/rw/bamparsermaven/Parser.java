@@ -56,14 +56,12 @@ public class Parser {
     private final File outFile;
     private final File tsvFile;
     private final Integer nCells;
-    private final boolean createXML;
 
-    public Parser(File inFile, File outFile, File tsvFile, Integer nCells, boolean createXML) {
+    public Parser(File inFile, File outFile, File tsvFile, Integer nCells) {
         this.inFile = inFile;
         this.outFile = outFile;
         this.tsvFile = tsvFile;
         this.nCells = nCells;
-        this.createXML = createXML;
     }
 
     /**
@@ -111,20 +109,7 @@ public class Parser {
             String cellString = sam.getStringAttribute("CB");
             String umiString = sam.getStringAttribute("UB");
             illuminaGeneDat.addSamRecord(sam, geneAttribute, cellString, umiString);
-        }
-//        System.out.println("UMis associated with genes " + debug + " UMIs    " + debugreads + " reads");
-//        long emptDropcount = outOfCellBCs.values().stream().flatMap((e)->e.stream()).distinct().count();
-//        System.out.println("Out Of Cell Barcodes (empty drops) " + emptDropcount);
-        //       System.out.println(dummyCellCounting.size() + " Cell barcodes found");
-        //try to compact things
-//
-//        for ( LongOpenHashSet s : outOfCellBCs.values()) {
-//            s.trim();
-//        }
-//        illuminaData.forEach((k,v)->{v.trim();v.forEach((x,y)->y.trim());});
-//        all10xselectedCells.trim();
-//        outOfCellBCs.forEach((k,v)->v.trim());
-//        
+        }       
         
         OutputStream streamOut;
         ObjectOutputStream oos = null;
