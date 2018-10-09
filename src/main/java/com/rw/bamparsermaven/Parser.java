@@ -56,18 +56,27 @@ public class Parser {
     private final File outFile;
     private final File tsvFile;
     private final Integer nCells;
+    private final String illuminaGeneFlag;
+    private final String cellBCFlag;
+    private final String umiFlag;
+    
 
-    public Parser(File inFile, File outFile, File tsvFile, Integer nCells) {
+    public Parser(File inFile, File outFile, File tsvFile, Integer nCells,
+            String illuminaGeneFlag, String cellBCFlag,String umiFlag ) {
         this.inFile = inFile;
         this.outFile = outFile;
         this.tsvFile = tsvFile;
         this.nCells = nCells;
+        this.illuminaGeneFlag = illuminaGeneFlag;
+        this.cellBCFlag = cellBCFlag;
+        this.umiFlag = umiFlag;
     }
 
     /**
      *
+     * @param windowSize
      */
-    public void parse() {
+    public void parse(int windowSize) {
         int nUMIsFound = 0;
         //File logFilePath = outFile.getParentFile();
         //key is cell BC , value is list of all UMIs
@@ -88,7 +97,7 @@ public class Parser {
         long starttime = System.currentTimeMillis();
         //******************************    Generate data for serialized object
         //HashSet<NucleicAcidTwoBitPerBase> dummyCellCounting = new HashSet<>();
-        ParsedIlluminaData illuminaGeneDat = new ParsedIlluminaData(all10xselCells);
+        ParsedIlluminaData illuminaGeneDat = new ParsedIlluminaData(all10xselCells, windowSize);
         int debugreads = 0;
         //int debugNcells =0;
         final SamReaderFactory factory
@@ -105,9 +114,9 @@ public class Parser {
             debugreads++;
             SAMRecord sam = samReadIterator.next();
             //gene
-            String geneAttribute = (String) sam.getAttribute("GN");
-            String cellString = sam.getStringAttribute("CB");
-            String umiString = sam.getStringAttribute("UB");
+            String geneAttribute = (String) sam.getAttribute(illuminaGeneFlag);
+            String cellString = sam.getStringAttribute(cellBCFlag);
+            String umiString = sam.getStringAttribute(umiFlag);
             illuminaGeneDat.addSamRecord(sam, geneAttribute, cellString, umiString);
         }       
         

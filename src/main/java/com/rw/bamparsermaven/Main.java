@@ -59,10 +59,17 @@ public class Main {
         }
         if (nCells == null && tsvFile == null || nCells != null && tsvFile != null) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("Must provide either n cells to use (-n) or cellranger tsv file(-t)", options);
+            formatter.printHelp("Must provide cellranger tsv file(-t) or define number of cells (-n) to use", options);
             System.exit(1);
         }
-        new Parser(inFile, outFile, tsvFile, nCells).parse();
+        int windowsize;
+        if(cmd.hasOption("w"))
+            windowsize = Integer.parseInt(cmd.getOptionValue("w"));
+        else
+            windowsize = 500;
+        new Parser(inFile, outFile, tsvFile, nCells,cmd.getOptionValue("g"),
+        cmd.getOptionValue("b"), cmd.getOptionValue("u"))
+                .parse(windowsize);
     }
 
     /**
@@ -84,6 +91,12 @@ public class Main {
                 desc("full path of object output file").
                 numberOfArgs(1)
                 .build());
+               options.addOption(Option.builder("w").
+                longOpt("windowSize").
+                required(false).
+                desc("Window size for genomic regions, defaults to 500. Don't set too small -> risk that nanopore does not have alignmentblock in region").
+                numberOfArgs(1)
+                .build());
         options.addOption(Option.builder("n").
                 longOpt("nCells").
                 required(false).
@@ -93,10 +106,28 @@ public class Main {
                 .build());
         options.addOption(Option.builder("t").
                 longOpt("tsv").
-                required(false).
+                required(true).
                 desc("use this 10x tsv to define the cell barcodes to use \n"
                         + "supply this or the 10x tsv file with the list of cell BCs\n"
                         + "bam file contains all barcodes also from drops without cells").
+                numberOfArgs(1)
+                .build());
+                     options.addOption(Option.builder("b").
+                longOpt("cellBCflag").
+                required(true).
+                desc("SAM tag for cell BC").
+                numberOfArgs(1)
+                .build());
+                                         options.addOption(Option.builder("u").
+                longOpt("umiFlag").
+                required(true).
+                desc("SAM tag for umi").
+                numberOfArgs(1)
+                .build());
+                                 options.addOption(Option.builder("g").
+                longOpt("geneFlag").
+                required(true).
+                desc("SAM tag for Gene name").
                 numberOfArgs(1)
                 .build());
         return options;
