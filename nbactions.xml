@@ -10,7 +10,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath com.rw.bamparsermaven.Main -o C:\Users\raine\Desktop\Nanopore_tests/10xChr21l.obj -t C:\Users\raine\Desktop\Nanopore_tests//barcodes.tsv -i C:\Users\raine\Desktop\Nanopore_tests\chr21_10x.bam -w 500</exec.args>
+                <exec.args>-classpath %classpath com.rw.bamparsermaven.Main -b CB -u UB -g GN -o C:\Users\raine\Desktop\Nanopore_tests/Illumina2rruns_chr9_1_50M.obj -t C:\Users\raine\IlluminaNanoporeMerger/barcodes.tsv -i C:\Users\raine\IlluminaNanoporeMerger\200c_2runs_Illumina.bam -w 500</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>
@@ -24,7 +24,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.rw.bamparsermaven.Main -o C:\Users\raine\Desktop\Nanopore_tests/10xChr21l.obj -t C:\Users\raine\Desktop\Nanopore_tests//barcodes.tsv -i C:\Users\raine\Desktop\Nanopore_tests\chr21_10x.bam -w 500</exec.args>
+                <exec.args>-agentlib:jdwp=transport=dt_socket,server=n,address=${jpda.address} -classpath %classpath com.rw.bamparsermaven.Main -b CB -u UB -g GN -o C:\Users\raine\Desktop\Nanopore_tests/Illumina2rruns_chr9_1_50M.obj -t C:\Users\raine\IlluminaNanoporeMerger/barcodes.tsv -i C:\Users\raine\IlluminaNanoporeMerger\200c_2runs_Illumina.bam -w 500</exec.args>
                 <exec.executable>java</exec.executable>
                 <jpda.listen>true</jpda.listen>
             </properties>
@@ -39,7 +39,7 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2.1:exec</goal>
             </goals>
             <properties>
-                <exec.args>-classpath %classpath com.rw.bamparsermaven.Main -o C:\Users\raine\Desktop\Nanopore_tests/10xChr21l.obj -t C:\Users\raine\Desktop\Nanopore_tests//barcodes.tsv -i C:\Users\raine\Desktop\Nanopore_tests\chr21_10x.bam -w 500</exec.args>
+                <exec.args>-classpath %classpath com.rw.bamparsermaven.Main -b CB -u UB -g GN -o C:\Users\raine\Desktop\Nanopore_tests/Illumina2rruns_chr9_1_50M.obj -t C:\Users\raine\IlluminaNanoporeMerger/barcodes.tsv -i C:\Users\raine\IlluminaNanoporeMerger\200c_2runs_Illumina.bam -w 500</exec.args>
                 <exec.executable>java</exec.executable>
             </properties>
         </action>

@@ -63,12 +63,13 @@ public class Main {
             System.exit(1);
         }
         int windowsize;
-        if(cmd.hasOption("w"))
+        if (cmd.hasOption("w")) {
             windowsize = Integer.parseInt(cmd.getOptionValue("w"));
-        else
+        } else {
             windowsize = 500;
-        new Parser(inFile, outFile, tsvFile, nCells,cmd.getOptionValue("g"),
-        cmd.getOptionValue("b"), cmd.getOptionValue("u"))
+        }
+        new Parser(inFile, outFile, tsvFile, nCells, cmd.getOptionValue("g"),
+                cmd.getOptionValue("b"), cmd.getOptionValue("u"))
                 .parse(windowsize);
     }
 
@@ -91,7 +92,7 @@ public class Main {
                 desc("full path of object output file").
                 numberOfArgs(1)
                 .build());
-               options.addOption(Option.builder("w").
+        options.addOption(Option.builder("w").
                 longOpt("windowSize").
                 required(false).
                 desc("Window size for genomic regions, defaults to 500. Don't set too small -> risk that nanopore does not have alignmentblock in region").
@@ -112,19 +113,19 @@ public class Main {
                         + "bam file contains all barcodes also from drops without cells").
                 numberOfArgs(1)
                 .build());
-                     options.addOption(Option.builder("b").
+        options.addOption(Option.builder("b").
                 longOpt("cellBCflag").
                 required(true).
                 desc("SAM tag for cell BC").
                 numberOfArgs(1)
                 .build());
-                                         options.addOption(Option.builder("u").
+        options.addOption(Option.builder("u").
                 longOpt("umiFlag").
                 required(true).
                 desc("SAM tag for umi").
                 numberOfArgs(1)
                 .build());
-                                 options.addOption(Option.builder("g").
+        options.addOption(Option.builder("g").
                 longOpt("geneFlag").
                 required(true).
                 desc("SAM tag for Gene name").

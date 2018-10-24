@@ -6,22 +6,18 @@
 package com.rw.bamparsermaven;
 
 import com.rw.nuc.encoding.TwoBit.NucleicAcidTwoBitPerBase;
+import com.rw.nuc.reads.Illumina.All10xselectedCells;
+import com.rw.nuc.reads.Illumina.Hashing;
 import com.rw.nuc.reads.Illumina.ParsedIlluminaData;
-import com.rw.nuc.reads.Illumina.byGene.IlluminaGeneData;
-import com.rw.nuc.reads.Illumina.byGene.IlluminaOneGeneData;
-import com.rw.nuc.reads.Illumina.byGene.IlluminaOneGeneOneCellData;
-import com.rw.nuc.reads.Illumina.byGene.OneUmiCounts;
-import com.rw.nuc.reads.Illumina.UnusedCellBCs;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamInputResource;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.ValidationStringency;
-import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.longs.LongHash;
+import it.unimi.dsi.fastutil.longs.LongOpenCustomHashSet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import java.beans.XMLEncoder;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -44,7 +40,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-
 /**
  *
  * @author rainer
@@ -59,10 +54,9 @@ public class Parser {
     private final String illuminaGeneFlag;
     private final String cellBCFlag;
     private final String umiFlag;
-    
 
     public Parser(File inFile, File outFile, File tsvFile, Integer nCells,
-            String illuminaGeneFlag, String cellBCFlag,String umiFlag ) {
+            String illuminaGeneFlag, String cellBCFlag, String umiFlag) {
         this.inFile = inFile;
         this.outFile = outFile;
         this.tsvFile = tsvFile;
@@ -82,22 +76,18 @@ public class Parser {
         //key is cell BC , value is list of all UMIs
 
         //all cells in 10x tsv file
-        LongOpenHashSet all10xselCells;
+        All10xselectedCells all10xselCells;
 //        /**
 //         * hashmap with all UMIs for each 10x selected cell
 //         */
 //        TLongLongHashMap allUmisEachCell = new TLongLongHashMap();
-        if (tsvFile != null) {
-            all10xselCells = getCellsToUseFromCellRangerTSV(tsvFile);
-        } else {
-            all10xselCells = getCellsToUseDefineNcells(nCells);
-        }
+
         //for each cell all UMIs that were found - for checking reads where cell BC found but no gene ... key is ell bc , value is set of UMIs
         //Long2ObjectOpenHashMap<LongOpenHashSet> allUMIsforEachCell = new Long2ObjectOpenHashMap<>(all10xselCells.size());
         long starttime = System.currentTimeMillis();
         //******************************    Generate data for serialized object
         //HashSet<NucleicAcidTwoBitPerBase> dummyCellCounting = new HashSet<>();
-        ParsedIlluminaData illuminaGeneDat = new ParsedIlluminaData(all10xselCells, windowSize);
+        ParsedIlluminaData illuminaGeneDat = null;
         int debugreads = 0;
         //int debugNcells =0;
         final SamReaderFactory factory
@@ -109,7 +99,7 @@ public class Parser {
             Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
         }
         SAMRecordIterator samReadIterator = sr.iterator(); //define maxscore for adapter
-       
+
         while (samReadIterator.hasNext()) {
             debugreads++;
             SAMRecord sam = samReadIterator.next();
@@ -117,9 +107,15 @@ public class Parser {
             String geneAttribute = (String) sam.getAttribute(illuminaGeneFlag);
             String cellString = sam.getStringAttribute(cellBCFlag);
             String umiString = sam.getStringAttribute(umiFlag);
+            if (illuminaGeneDat == null)// need cellBC length to construct it
+            {
+                all10xselCells = tsvFile != null ? getCellsToUseFromCellRangerTSV(tsvFile, Hashing.get_LONG_HASH_STRATEGY(cellString.length() - 2))
+                        : getCellsToUseDefineNcells(nCells, Hashing.get_LONG_HASH_STRATEGY(cellString.length() - 2));
+                illuminaGeneDat = new ParsedIlluminaData(all10xselCells, windowSize);
+            }
             illuminaGeneDat.addSamRecord(sam, geneAttribute, cellString, umiString);
-        }       
-        
+        }
+
         OutputStream streamOut;
         ObjectOutputStream oos = null;
         try {
@@ -184,8 +180,9 @@ public class Parser {
      * @param tsvFile cellranger file with list of cell BC use
      * @return
      */
-    private LongOpenHashSet getCellsToUseFromCellRangerTSV(File tsvFile) {
-        LongOpenHashSet retval = new LongOpenHashSet();
+    private All10xselectedCells getCellsToUseFromCellRangerTSV(File tsvFile, LongHash.Strategy strategy) {
+        All10xselectedCells retval;
+        retval = new All10xselectedCells(strategy);
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(tsvFile));
@@ -210,7 +207,7 @@ public class Parser {
      * @param n
      * @return
      */
-    private LongOpenHashSet getCellsToUseDefineNcells(int n) {
+    private All10xselectedCells getCellsToUseDefineNcells(int n, LongHash.Strategy strategy) {
         long starttime = System.currentTimeMillis();
         //don't treat UMIs per gene, simply count UMIs for cells, corrected 10 nt UMIs should not collide for transcripts of cells
         //key is cell BC , value is Hashset of UMIs - entered just the long value not the object to use efficient Trove TlongHashset instead of HashSet<NucleicAcidTwoBitPerBase>
@@ -260,8 +257,8 @@ public class Parser {
                 .map(e -> e.getKey())
                 .collect(Collectors.toCollection(ArrayList::new)); //https://stackoverflow.com/questions/30425836/java-8-stream-map-to-list-of-keys-sorted-by-values 
         saveSelectedCellsInfo(bcList, umiCountsList); // save umi counts for selected cells
-        LongOpenHashSet cellsToUse = new LongOpenHashSet();
-        bcList.forEach(e->cellsToUse.add(e.getSequence()) );
+       All10xselectedCells cellsToUse = new All10xselectedCells(strategy);
+        bcList.forEach(e -> cellsToUse.add(e.getSequence()));
 //            all10xselectedCells = umiCountsCellBCmap.entrySet().stream()
 //                    .peek(e -> umiCountsList.add(e.getKey()))
 //                    .map(e -> e.getValue())
