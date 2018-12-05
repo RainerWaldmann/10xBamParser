@@ -182,7 +182,7 @@ public class Parser {
      */
     private All10xselectedCells getCellsToUseFromCellRangerTSV(File tsvFile, LongHash.Strategy strategy) {
         All10xselectedCells retval;
-        retval = new All10xselectedCells(strategy);
+        retval = new All10xselectedCells();
         BufferedReader reader;
         try {
             reader = new BufferedReader(new FileReader(tsvFile));
@@ -257,7 +257,7 @@ public class Parser {
                 .map(e -> e.getKey())
                 .collect(Collectors.toCollection(ArrayList::new)); //https://stackoverflow.com/questions/30425836/java-8-stream-map-to-list-of-keys-sorted-by-values 
         saveSelectedCellsInfo(bcList, umiCountsList); // save umi counts for selected cells
-       All10xselectedCells cellsToUse = new All10xselectedCells(strategy);
+       All10xselectedCells cellsToUse = new All10xselectedCells();
         bcList.forEach(e -> cellsToUse.add(e.getSequence()));
 //            all10xselectedCells = umiCountsCellBCmap.entrySet().stream()
 //                    .peek(e -> umiCountsList.add(e.getKey()))
