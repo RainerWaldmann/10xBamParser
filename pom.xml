@@ -24,7 +24,11 @@
             <artifactId>guava</artifactId>
             <version>24.0-jre</version>
         </dependency>-->
-
+<dependency>
+    <groupId>org.eclipse.collections</groupId>
+    <artifactId>eclipse-collections</artifactId>
+    <version>9.2.0</version>
+</dependency>
         <dependency>
             <groupId>it.unimi.dsi</groupId>
             <artifactId>fastutil</artifactId>

@@ -15,9 +15,6 @@ import htsjdk.samtools.SamInputResource;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.ValidationStringency;
-import it.unimi.dsi.fastutil.longs.LongHash;
-import it.unimi.dsi.fastutil.longs.LongOpenCustomHashSet;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -39,6 +36,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import org.eclipse.collections.impl.set.mutable.primitive.LongHashSet;
 
 /**
  *
@@ -109,8 +107,8 @@ public class Parser {
             String umiString = sam.getStringAttribute(umiFlag);
             if (illuminaGeneDat == null)// need cellBC length to construct it
             {
-                all10xselCells = tsvFile != null ? getCellsToUseFromCellRangerTSV(tsvFile, Hashing.get_LONG_HASH_STRATEGY(cellString.length() - 2))
-                        : getCellsToUseDefineNcells(nCells, Hashing.get_LONG_HASH_STRATEGY(cellString.length() - 2));
+                all10xselCells = tsvFile != null ? getCellsToUseFromCellRangerTSV(tsvFile)
+                        : getCellsToUseDefineNcells(nCells);
                 illuminaGeneDat = new ParsedIlluminaData(all10xselCells, windowSize);
             }
             illuminaGeneDat.addSamRecord(sam, geneAttribute, cellString, umiString);
@@ -180,7 +178,7 @@ public class Parser {
      * @param tsvFile cellranger file with list of cell BC use
      * @return
      */
-    private All10xselectedCells getCellsToUseFromCellRangerTSV(File tsvFile, LongHash.Strategy strategy) {
+    private All10xselectedCells getCellsToUseFromCellRangerTSV(File tsvFile) {
         All10xselectedCells retval;
         retval = new All10xselectedCells();
         BufferedReader reader;
@@ -207,11 +205,11 @@ public class Parser {
      * @param n
      * @return
      */
-    private All10xselectedCells getCellsToUseDefineNcells(int n, LongHash.Strategy strategy) {
+    private All10xselectedCells getCellsToUseDefineNcells(int n) {
         long starttime = System.currentTimeMillis();
         //don't treat UMIs per gene, simply count UMIs for cells, corrected 10 nt UMIs should not collide for transcripts of cells
         //key is cell BC , value is Hashset of UMIs - entered just the long value not the object to use efficient Trove TlongHashset instead of HashSet<NucleicAcidTwoBitPerBase>
-        HashMap<NucleicAcidTwoBitPerBase, LongOpenHashSet> umiCountingMap = new HashMap<>();
+        HashMap<NucleicAcidTwoBitPerBase, LongHashSet> umiCountingMap = new HashMap<>();
         final SamReaderFactory factory
                 = SamReaderFactory.makeDefault().validationStringency(ValidationStringency.SILENT);
         SamReader sr = null;
@@ -233,9 +231,9 @@ public class Parser {
                     if (cellString != null && u != null) {
                         int dashindex = cellString.indexOf('-');//CB contains -1 in the end
                         NucleicAcidTwoBitPerBase cellbc = new NucleicAcidTwoBitPerBase(dashindex == -1 ? cellString : cellString.substring(0, dashindex));
-                        LongOpenHashSet oneCellData;
+                        LongHashSet oneCellData;
                         if ((oneCellData = umiCountingMap.get(cellbc)) == null) {
-                            umiCountingMap.put(cellbc, (oneCellData = new LongOpenHashSet()));
+                            umiCountingMap.put(cellbc, (oneCellData = new LongHashSet()));
                         }
                         oneCellData.add((new NucleicAcidTwoBitPerBase(u)).getSequence());//just add the long val for hashing to save ram
                     }
