@@ -98,16 +98,16 @@ public class Main {
                 desc("Window size for genomic regions, defaults to 500. Don't set too small -> risk that nanopore does not have alignmentblock in region").
                 numberOfArgs(1)
                 .build());
-        options.addOption(Option.builder("n").
-                longOpt("nCells").
-                required(false).
-                desc("use n cells with the most umis\nsupply this or the 10x tsv file with the list of cell BCs"
-                        + "bam file contains all barcodes also from drops without cells").
-                numberOfArgs(1)
-                .build());
+//        options.addOption(Option.builder("n").
+//                longOpt("nCells").
+//                required(false).
+//                desc("use n cells with the most umis\nsupply this or the 10x tsv file with the list of cell BCs"
+//                        + "bam file contains all barcodes also from drops without cells").
+//                numberOfArgs(1)
+//                .build());
         options.addOption(Option.builder("t").
                 longOpt("tsv").
-                required(false).
+                required(true).
                 desc("use this 10x tsv to define the cell barcodes to use \n"
                         + "supply this or the 10x tsv file with the list of cell BCs\n"
                         + "bam file contains all barcodes also from drops without cells").

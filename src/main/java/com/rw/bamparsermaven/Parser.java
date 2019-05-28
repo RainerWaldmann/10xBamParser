@@ -270,7 +270,7 @@ public class Parser {
         System.out.println("total Umis : \t" + umiCountsList.stream().mapToInt(Integer::intValue).sum());
         System.out.println("median Umis/cell : \t" + umiCountsList.get(Math.round(umiCountsList.size() / 2)));
         System.out.println("mean Umis/cell : \t" + umiCountsList.stream().reduce(0, Integer::sum) / umiCountsList.size());
-        System.out.println("took " + (new SimpleDateFormat("mm:ss:SSS")).format(new Date(System.currentTimeMillis() - starttime)));
+        //System.out.println("took " + (new SimpleDateFormat("mm:ss:SSS")).format(new Date(System.currentTimeMillis() - starttime)));
         return cellsToUse;
     }
 
