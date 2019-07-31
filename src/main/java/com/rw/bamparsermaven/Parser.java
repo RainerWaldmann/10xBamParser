@@ -101,8 +101,13 @@ public class Parser {
             Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
         }
         SAMRecordIterator samReadIterator = sr.iterator(); //define maxscore for adapter
-
+        int count = 0;
         while (samReadIterator.hasNext()) {
+            count++;
+            if(count % 1000 == 0)
+                System.out.print(".");
+            if(count % 50000 == 0)
+                System.out.println();
             debugreads++;
             SAMRecord sam = samReadIterator.next();
             //gene
