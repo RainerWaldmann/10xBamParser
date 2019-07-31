@@ -71,7 +71,7 @@ public class Parser {
      * @param windowSize
      */
     public void parse(int windowSize) {
-        int nUMIsFound = 0;
+        //int nUMIsFound = 0;
         //File logFilePath = outFile.getParentFile();
         //key is cell BC , value is list of all UMIs
 
@@ -134,7 +134,14 @@ public class Parser {
                 Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        System.out.println((new SimpleDateFormat("mm:ss:SSS")).format(new Date(System.currentTimeMillis() - starttime)));
+        System.out.println("Scan took: " + (new SimpleDateFormat("mm:ss:SSS")).format(new Date(System.currentTimeMillis() - starttime)));
+        System.out.println("Getting some stats");
+        int umiCountGenes = illuminaGeneDat.illuminaGenesData.entrySet().stream().map(x->x.getValue()).
+                flatMap(v -> v.stream()).mapToInt(f-> f.size()).sum();
+        System.out.println("Found " + umiCountGenes + " UMIs associated with genes.");
+        if(umiCountGenes == 0)
+             System.out.println("!!!!!!!! WARNING - NO UMI ASSOCIATED WITH GENES FOUND -- CHECK PARAMETERS !!!!!!");
+        //int umiCountRegions = illuminaGeneDat.illuminaChromosomesData.values().stream().flatMap(x -> x.stream()).
         //       System.out.println("took " + (System.currentTimeMillis() - starttime) / 1000 + " secs\n type enter to exit");
 //        System.out.println("TES reading file");
 //        //illuminaData = null;
