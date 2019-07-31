@@ -59,7 +59,7 @@ public class Main {
         }
         if (nCells == null && tsvFile == null || nCells != null && tsvFile != null) {
             HelpFormatter formatter = new HelpFormatter();
-            formatter.printHelp("Must provide either cellranger tsv file(-t) or define number of cells (-n) to use", options);
+            formatter.printHelp("Must provide cellranger tsv file(-t)", options);
             System.exit(1);
         }
         int windowsize;
@@ -108,9 +108,7 @@ public class Main {
         options.addOption(Option.builder("t").
                 longOpt("tsv").
                 required(true).
-                desc("use this 10x tsv to define the cell barcodes to use \n"
-                        + "supply this or the 10x tsv file with the list of cell BCs\n"
-                        + "bam file contains all barcodes also from drops without cells").
+                desc("use this 10x tsv to define the cell barcodes to use \n. Can be compressed (zip extension)").
                 numberOfArgs(1)
                 .build());
         options.addOption(Option.builder("b").

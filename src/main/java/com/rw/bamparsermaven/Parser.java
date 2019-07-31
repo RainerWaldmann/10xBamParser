@@ -29,8 +29,11 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +42,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.zip.ZipInputStream;
 
 /**
  *
@@ -192,7 +196,13 @@ public class Parser {
         retval = new All10xselectedCells();
         BufferedReader reader;
         try {
-            reader = new BufferedReader(new FileReader(tsvFile));
+            InputStream is;
+            if(tsvFile.getName().endsWith(".zip")){
+             is = new ZipInputStream(new FileInputStream(tsvFile));   
+            } else
+                is = new FileInputStream(tsvFile);
+            reader = new BufferedReader(new InputStreamReader(is));
+            //reader = new BufferedReader(new FileReader(tsvFile));
             String s;
             while ((s = reader.readLine()) != null) {
                 int dashindex = s.indexOf('-');//CB contains -1 in the end
