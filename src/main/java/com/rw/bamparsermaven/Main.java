@@ -108,7 +108,7 @@ public class Main {
         options.addOption(Option.builder("t").
                 longOpt("tsv").
                 required(true).
-                desc("use this 10x tsv to define the cell barcodes to use \n.").
+                desc("use this 10x tsv to define the cell barcodes to use \n. gzip compressed with .gz extension is also o.k.").
                 numberOfArgs(1)
                 .build());
         options.addOption(Option.builder("b").

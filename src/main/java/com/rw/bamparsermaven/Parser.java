@@ -138,11 +138,12 @@ public class Parser {
         }
         System.out.println("Scan took: " + (new SimpleDateFormat("mm:ss:SSS")).format(new Date(System.currentTimeMillis() - starttime)));
         System.out.println("Getting some stats");
-        int umiCountGenes = illuminaGeneDat.illuminaGenesData.entrySet().stream().map(x->x.getValue()).
-                flatMap(v -> v.stream()).mapToInt(f-> f.size()).sum();
+        int umiCountGenes = illuminaGeneDat.illuminaGenesData.entrySet().stream().map(x -> x.getValue()).
+                flatMap(v -> v.stream()).mapToInt(f -> f.size()).sum();
         System.out.println("Found " + umiCountGenes + " UMIs associated with genes.");
-        if(umiCountGenes == 0)
-             System.out.println("!!!!!!!! WARNING - NO UMI ASSOCIATED WITH GENES FOUND -- CHECK PARAMETERS !!!!!!");
+        if (umiCountGenes == 0) {
+            System.out.println("!!!!!!!! WARNING - NO UMI ASSOCIATED WITH GENES FOUND -- CHECK PARAMETERS !!!!!!");
+        }
         //int umiCountRegions = illuminaGeneDat.illuminaChromosomesData.values().stream().flatMap(x -> x.stream()).
         //       System.out.println("took " + (System.currentTimeMillis() - starttime) / 1000 + " secs\n type enter to exit");
 //        System.out.println("TES reading file");
@@ -194,13 +195,11 @@ public class Parser {
         retval = new All10xselectedCells();
         BufferedReader reader;
         try {
-//            InputStream is;
-//            if(tsvFile.getName().endsWith(".gz")){
-//             is = new GZIPInputStream(new FileInputStream(tsvFile));   
-//            } else
-//                is = new FileInputStream(tsvFile);
-//            reader = new BufferedReader(new InputStreamReader(is));
-           reader = new BufferedReader(new FileReader(tsvFile));
+            if (tsvFile.getName().endsWith(".gz")) {
+                reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(tsvFile))));
+            } else {
+                reader = new BufferedReader(new FileReader(tsvFile));
+            }
             String s;
             while ((s = reader.readLine()) != null) {
                 int dashindex = s.indexOf('-');//CB contains -1 in the end
@@ -272,7 +271,7 @@ public class Parser {
                 .map(e -> e.getKey())
                 .collect(Collectors.toCollection(ArrayList::new)); //https://stackoverflow.com/questions/30425836/java-8-stream-map-to-list-of-keys-sorted-by-values 
         saveSelectedCellsInfo(bcList, umiCountsList); // save umi counts for selected cells
-       All10xselectedCells cellsToUse = new All10xselectedCells();
+        All10xselectedCells cellsToUse = new All10xselectedCells();
         bcList.forEach(e -> cellsToUse.add(e.getSequence()));
 //            all10xselectedCells = umiCountsCellBCmap.entrySet().stream()
 //                    .peek(e -> umiCountsList.add(e.getKey()))
