@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -193,13 +194,13 @@ public class Parser {
         retval = new All10xselectedCells();
         BufferedReader reader;
         try {
-            InputStream is;
-            if(tsvFile.getName().endsWith(".gz")){
-             is = new GZIPInputStream(new FileInputStream(tsvFile));   
-            } else
-                is = new FileInputStream(tsvFile);
-            reader = new BufferedReader(new InputStreamReader(is));
-            //reader = new BufferedReader(new FileReader(tsvFile));
+//            InputStream is;
+//            if(tsvFile.getName().endsWith(".gz")){
+//             is = new GZIPInputStream(new FileInputStream(tsvFile));   
+//            } else
+//                is = new FileInputStream(tsvFile);
+//            reader = new BufferedReader(new InputStreamReader(is));
+           reader = new BufferedReader(new FileReader(tsvFile));
             String s;
             while ((s = reader.readLine()) != null) {
                 int dashindex = s.indexOf('-');//CB contains -1 in the end
