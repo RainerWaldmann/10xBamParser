@@ -16,7 +16,6 @@ import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.ValidationStringency;
 import it.unimi.dsi.fastutil.longs.LongHash;
-import it.unimi.dsi.fastutil.longs.LongOpenCustomHashSet;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -26,14 +25,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -42,7 +39,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.zip.ZipInputStream;
+import java.util.zip.GZIPInputStream;
 
 /**
  *
@@ -197,8 +194,8 @@ public class Parser {
         BufferedReader reader;
         try {
             InputStream is;
-            if(tsvFile.getName().endsWith(".zip")){
-             is = new ZipInputStream(new FileInputStream(tsvFile));   
+            if(tsvFile.getName().endsWith(".gz")){
+             is = new GZIPInputStream(new FileInputStream(tsvFile));   
             } else
                 is = new FileInputStream(tsvFile);
             reader = new BufferedReader(new InputStreamReader(is));
