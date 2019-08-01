@@ -217,6 +217,7 @@ public class Parser {
         } catch (IOException ex) {
             Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
         }
+        retval.compact();
         return retval;
     }
 

@@ -56,6 +56,10 @@ public class Main {
         File tsvFile = null;
         if (tsv != null) {
             tsvFile = new File(tsv);
+            if(tsvFile.exists() == false || tsvFile.canRead() == false){
+                System.out.println("tsv file with barcodes " + tsvFile.toString() + " does not exist or not readable");
+                System.exit(1);
+            }
         }
         if (nCells == null && tsvFile == null || nCells != null && tsvFile != null) {
             HelpFormatter formatter = new HelpFormatter();
