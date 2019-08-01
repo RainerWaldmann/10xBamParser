@@ -6,6 +6,7 @@
 package com.rw.bamparsermaven;
 
 import java.io.File;
+import java.time.LocalDate;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -26,6 +27,13 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+       LocalDate exp = LocalDate.of(2020, 1, 1);
+        if(LocalDate.now().isAfter(exp)){
+            System.out.println("****************************************************************************************************************************************");
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  EXPIRED " + exp.toString() +  " - Download a new version from Github !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+            System.out.println("****************************************************************************************************************************************");
+            System.exit(0);
+        }
         File inFile;
         File outFile;
         Options options = cli_otions();
@@ -112,7 +120,7 @@ public class Main {
         options.addOption(Option.builder("t").
                 longOpt("tsv").
                 required(true).
-                desc("use this 10x tsv to define the cell barcodes to use \n. gzip compressed with .gz extension is also o.k.").
+                desc("use this 10x tsv FILE to define the cell barcodes to use ").
                 numberOfArgs(1)
                 .build());
         options.addOption(Option.builder("b").

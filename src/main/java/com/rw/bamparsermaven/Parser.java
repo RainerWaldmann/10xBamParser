@@ -200,11 +200,11 @@ public class Parser {
         retval = new All10xselectedCells();
         BufferedReader reader;
         try {
-            if (tsvFile.getName().endsWith(".gz")) {
-                reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(tsvFile))));
-            } else {
+//            if (tsvFile.getName().endsWith(".gz")) {
+//                reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(tsvFile))));
+//            } else {
                 reader = new BufferedReader(new FileReader(tsvFile));
-            }
+//            }
             String s;
             while ((s = reader.readLine()) != null) {
                 int dashindex = s.indexOf('-');//CB contains -1 in the end
