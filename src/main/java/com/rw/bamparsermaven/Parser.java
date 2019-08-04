@@ -104,9 +104,9 @@ public class Parser {
         int count = 0;
         while (samReadIterator.hasNext()) {
             count++;
-            if(count % 1000 == 0)
+            if(count % 10000 == 0)
                 System.out.print(".");
-            if(count % 50000 == 0)
+            if(count % 500000 == 0)
                 System.out.println();
             debugreads++;
             SAMRecord sam = samReadIterator.next();
@@ -143,12 +143,12 @@ public class Parser {
         }
         System.out.println("Scan took: " + (new SimpleDateFormat("mm:ss:SSS")).format(new Date(System.currentTimeMillis() - starttime)));
         System.out.println("Getting some stats");
-        int umiCountGenes = illuminaGeneDat.illuminaGenesData.entrySet().stream().map(x -> x.getValue()).
-                flatMap(v -> v.stream()).mapToInt(f -> f.size()).sum();
-        System.out.println("Found " + umiCountGenes + " UMIs associated with genes.");
-        if (umiCountGenes == 0) {
-            System.out.println("!!!!!!!! WARNING - NO UMI ASSOCIATED WITH GENES FOUND -- CHECK PARAMETERS !!!!!!");
-        }
+//        int umiCountGenes = illuminaGeneDat.illuminaGenesData.entrySet().stream().map(x -> x.getValue()).
+//                flatMap(v -> v.stream()).mapToInt(f -> f.size()).sum();
+//        System.out.println("Found " + umiCountGenes + " UMIs associated with genes.");
+//        if (umiCountGenes == 0) {
+//            System.out.println("!!!!!!!! WARNING - NO UMI ASSOCIATED WITH GENES FOUND -- CHECK PARAMETERS !!!!!!");
+//        }
         //int umiCountRegions = illuminaGeneDat.illuminaChromosomesData.values().stream().flatMap(x -> x.stream()).
         //       System.out.println("took " + (System.currentTimeMillis() - starttime) / 1000 + " secs\n type enter to exit");
 //        System.out.println("TES reading file");
@@ -217,7 +217,7 @@ public class Parser {
         } catch (IOException ex) {
             Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
         }
-        retval.compact();
+        //retval.compact();
         return retval;
     }
 
