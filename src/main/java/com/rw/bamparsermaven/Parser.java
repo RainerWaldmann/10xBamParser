@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -49,6 +50,7 @@ import java.util.zip.GZIPInputStream;
 public class Parser {
 
     private final static String cellsUMIsLogFileSuffix = ".cellsUmicounts.txt";
+    public static final DecimalFormat DEC_FORMATTER = new DecimalFormat("###,###,###,###,###");
     private final File inFile;
     private final File outFile;
     private final File tsvFile;
@@ -104,10 +106,13 @@ public class Parser {
         int count = 0;
         while (samReadIterator.hasNext()) {
             count++;
-            if(count % 100000 == 0)
+            if (count % 100000 == 0) {
                 System.out.print(".");
-            if(count % 5000000 == 0)
+            }
+            if (count % 5000000 == 0) {
+                System.out.print(String.format("%15s", DEC_FORMATTER.format(count)) + " sam records");
                 System.out.println();
+            }
             debugreads++;
             SAMRecord sam = samReadIterator.next();
             //gene
@@ -203,7 +208,7 @@ public class Parser {
 //            if (tsvFile.getName().endsWith(".gz")) {
 //                reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(tsvFile))));
 //            } else {
-                reader = new BufferedReader(new FileReader(tsvFile));
+            reader = new BufferedReader(new FileReader(tsvFile));
 //            }
             String s;
             while ((s = reader.readLine()) != null) {
