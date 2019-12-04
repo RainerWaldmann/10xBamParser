@@ -104,23 +104,26 @@ public class Parser {
         int count = 0;
         while (samReadIterator.hasNext()) {
             count++;
-            if(count % 100000 == 0)
+            if (count % 100000 == 0) {
                 System.out.print(".");
-            if(count % 5000000 == 0)
+            }
+            if (count % 5000000 == 0) {
                 System.out.println();
+            }
             debugreads++;
             SAMRecord sam = samReadIterator.next();
             //gene
             String geneAttribute = (String) sam.getAttribute(illuminaGeneFlag);
             String cellString = sam.getStringAttribute(cellBCFlag);
             String umiString = sam.getStringAttribute(umiFlag);
-            if (illuminaGeneDat == null)// need cellBC length to construct it
-            {
-                all10xselCells = tsvFile != null ? getCellsToUseFromCellRangerTSV(tsvFile, Hashing.get_LONG_HASH_STRATEGY(cellString.length() - 2))
-                        : getCellsToUseDefineNcells(nCells, Hashing.get_LONG_HASH_STRATEGY(cellString.length() - 2));
-                illuminaGeneDat = new ParsedIlluminaData(all10xselCells, windowSize);
+            if (cellString != null) {
+                if (illuminaGeneDat == null)// need cellBC length to construct it
+                {
+                    all10xselCells =  getCellsToUseFromCellRangerTSV(tsvFile, Hashing.get_LONG_HASH_STRATEGY(cellString.length() - 2));
+                    illuminaGeneDat = new ParsedIlluminaData(all10xselCells, windowSize);
+                }
+                illuminaGeneDat.addSamRecord(sam, geneAttribute, cellString, umiString);
             }
-            illuminaGeneDat.addSamRecord(sam, geneAttribute, cellString, umiString);
         }
 
         OutputStream streamOut;
@@ -203,7 +206,7 @@ public class Parser {
 //            if (tsvFile.getName().endsWith(".gz")) {
 //                reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(tsvFile))));
 //            } else {
-                reader = new BufferedReader(new FileReader(tsvFile));
+            reader = new BufferedReader(new FileReader(tsvFile));
 //            }
             String s;
             while ((s = reader.readLine()) != null) {
