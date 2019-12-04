@@ -23,13 +23,13 @@ import org.apache.commons.cli.ParseException;
  */
 public class Main {
     private static final String VERSION = "1.001";
-    private static final String BUILD_DATE = "  Build Dec 3, 2019";
+    private static final String BUILD_DATE = "  Build Dec 4, 2019";
     //private static 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        System.out.println(Main.class.getResource("/versionbuild.properties"));
+       // System.out.println(Main.class.getResource("/versionbuild.properties"));
        System.out.println("+++++++   ILLUMINAPARSER " + VERSION + BUILD_DATE + "++++++++++++");
        LocalDate exp = LocalDate.of(2020, 4, 4);
         if(LocalDate.now().isAfter(exp)){
