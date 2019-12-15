@@ -9,6 +9,7 @@ import com.rw.nuc.encoding.TwoBit.NucleicAcidTwoBitPerBase;
 import com.rw.nuc.reads.Illumina.All10xselectedCells;
 import com.rw.nuc.reads.Illumina.Hashing;
 import com.rw.nuc.reads.Illumina.ParsedIlluminaData;
+import com.rw.nuc.reads.Illumina.ParsingErrorFlags;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamInputResource;
@@ -56,9 +57,10 @@ public class Parser {
     private final String illuminaGeneFlag;
     private final String cellBCFlag;
     private final String umiFlag;
+    private final String geneSplitString;
 
     public Parser(File inFile, File outFile, File tsvFile, Integer nCells,
-            String illuminaGeneFlag, String cellBCFlag, String umiFlag) {
+            String illuminaGeneFlag, String cellBCFlag, String umiFlag, String geneSplitString) {
         this.inFile = inFile;
         this.outFile = outFile;
         this.tsvFile = tsvFile;
@@ -66,6 +68,7 @@ public class Parser {
         this.illuminaGeneFlag = illuminaGeneFlag;
         this.cellBCFlag = cellBCFlag;
         this.umiFlag = umiFlag;
+        this.geneSplitString = geneSplitString;
     }
 
     /**
@@ -73,6 +76,7 @@ public class Parser {
      * @param windowSize
      */
     public void parse(int windowSize) {
+        int errorFlag = 0;
         //int nUMIsFound = 0;
         //File logFilePath = outFile.getParentFile();
         //key is cell BC , value is list of all UMIs
@@ -89,7 +93,7 @@ public class Parser {
         long starttime = System.currentTimeMillis();
         //******************************    Generate data for serialized object
         //HashSet<NucleicAcidTwoBitPerBase> dummyCellCounting = new HashSet<>();
-        ParsedIlluminaData illuminaGeneDat = null;
+        ParsedIlluminaData parsedIlluminaData = null;
         int debugreads = 0;
         //int debugNcells =0;
         final SamReaderFactory factory
@@ -117,12 +121,12 @@ public class Parser {
             String cellString = sam.getStringAttribute(cellBCFlag);
             String umiString = sam.getStringAttribute(umiFlag);
             if (cellString != null) {
-                if (illuminaGeneDat == null)// need cellBC length to construct it
+                if (parsedIlluminaData == null)// need cellBC length to construct it
                 {
                     all10xselCells =  getCellsToUseFromCellRangerTSV(tsvFile, Hashing.get_LONG_HASH_STRATEGY(cellString.length() - 2));
-                    illuminaGeneDat = new ParsedIlluminaData(all10xselCells, windowSize);
+                    parsedIlluminaData = new ParsedIlluminaData(all10xselCells, windowSize);
                 }
-                illuminaGeneDat.addSamRecord(sam, geneAttribute, cellString, umiString);
+                errorFlag |= parsedIlluminaData.addSamRecord(sam, geneAttribute, cellString, umiString, geneSplitString);
             }
         }
 
@@ -131,7 +135,7 @@ public class Parser {
         try {
             streamOut = new BufferedOutputStream(new FileOutputStream(outFile), 1000000);
             oos = new ObjectOutputStream(streamOut);
-            oos.writeObject(illuminaGeneDat);
+            oos.writeObject(parsedIlluminaData);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
@@ -146,13 +150,21 @@ public class Parser {
         }
         System.out.println("Scan took: " + (new SimpleDateFormat("mm:ss:SSS")).format(new Date(System.currentTimeMillis() - starttime)));
         System.out.println("Getting some stats");
-        int umiCountGenes = illuminaGeneDat.illuminaGenesData.entrySet().stream().map(x -> x.getValue()).
-                flatMap(v -> v.entrySet().stream()).mapToInt(f -> f.getValue().size()).sum();
+        //added
+        int umiCountGenes = parsedIlluminaData.illuminaGenesData.entrySet().stream().//Entry<String,IlluminaOneGeneData>
+                filter(t -> t!= null).//very likely unnecessary
+                map(x -> x.getValue()).filter(m -> m != null).
+                flatMap(v -> v.entrySet().stream()).//Entry<Long,IlluminaOneGeneOneCellData>
+                map(h -> h.getValue()).filter(y -> y != null).
+                mapToInt( p -> p.size()).sum();
+               // mapToInt(f -> f.getValue() == null ? 0 : f.getValue().size()).sum();
         System.out.println("Found " + umiCountGenes + " UMIs associated with genes.");
         if (umiCountGenes == 0) {
             System.out.println("!!!!!!!! WARNING - NO UMI ASSOCIATED WITH GENES FOUND -- CHECK PARAMETERS !!!!!!");
         }
-        //int umiCountRegions = illuminaGeneDat.illuminaChromosomesData.values().stream().flatMap(x -> x.stream()).
+        if(errorFlag != 0)
+            ParsingErrorFlags.print(errorFlag, System.out);
+        //int umiCountRegions = parsedIlluminaData.illuminaChromosomesData.values().stream().flatMap(x -> x.stream()).
         //       System.out.println("took " + (System.currentTimeMillis() - starttime) / 1000 + " secs\n type enter to exit");
 //        System.out.println("TES reading file");
 //        //illuminaData = null;
