@@ -48,7 +48,7 @@ import java.util.zip.GZIPInputStream;
  * @author rainer
  */
 public class Parser {
-
+    
     private final static String cellsUMIsLogFileSuffix = ".cellsUmicounts.txt";
     private final File inFile;
     private final File outFile;
@@ -58,7 +58,13 @@ public class Parser {
     private final String cellBCFlag;
     private final String umiFlag;
     private final String geneSplitString;
-
+    /**
+     * protection against error in cmd line
+     */
+    private boolean geneFlagseenAtleastOnce = false;
+    private boolean cellBCFlagseenAtleastOnce = false;
+    private boolean umiFlagseenAtleastOnce = false;
+    
     public Parser(File inFile, File outFile, File tsvFile, Integer nCells,
             String illuminaGeneFlag, String cellBCFlag, String umiFlag, String geneSplitString) {
         this.inFile = inFile;
@@ -106,6 +112,7 @@ public class Parser {
         }
         SAMRecordIterator samReadIterator = sr.iterator(); //define maxscore for adapter
         int count = 0;
+        
         while (samReadIterator.hasNext()) {
             count++;
             if (count % 100000 == 0) {
@@ -120,16 +127,35 @@ public class Parser {
             String geneAttribute = (String) sam.getAttribute(illuminaGeneFlag);
             String cellString = sam.getStringAttribute(cellBCFlag);
             String umiString = sam.getStringAttribute(umiFlag);
+            geneFlagseenAtleastOnce |= geneAttribute != null;
+            cellBCFlagseenAtleastOnce |= cellString != null;
+            umiFlagseenAtleastOnce |= umiString != null;
             if (cellString != null) {
                 if (parsedIlluminaData == null)// need cellBC length to construct it
                 {
-                    all10xselCells =  getCellsToUseFromCellRangerTSV(tsvFile, Hashing.get_LONG_HASH_STRATEGY(cellString.length() - 2));
+                    all10xselCells = getCellsToUseFromCellRangerTSV(tsvFile, Hashing.get_LONG_HASH_STRATEGY(cellString.length() - 2));
                     parsedIlluminaData = new ParsedIlluminaData(all10xselCells, windowSize);
                 }
                 errorFlag |= parsedIlluminaData.addSamRecord(sam, geneAttribute, cellString, umiString, geneSplitString);
             }
         }
-
+        if (geneFlagseenAtleastOnce == false) {
+            System.out.println("!!!!!! Error : Sam tag for gene name <" + illuminaGeneFlag + "> not found in any sam record\n Verify command line and/or bam file");
+            System.exit(0);
+        }
+        if (cellBCFlagseenAtleastOnce == false) {
+            System.out.println("!!!!!! Error : Sam tag for cell barcode <" + cellBCFlag + "> not found in any sam record\n Verify command line and/or bam file");
+            System.exit(0);
+        }
+        if (umiFlagseenAtleastOnce == false) {
+            System.out.println("!!!!!! Error : Sam tag for umi <" + umiFlag + "> not found in any sam record\n Verify command line and/or bam file");
+            System.exit(0);
+        }
+        if (parsedIlluminaData == null || parsedIlluminaData.illuminaGenesData == null) {
+            System.out.println("!!!!!!Error:  No SAM record found that has the SAM tags for a gene, cell barcode and UMI provided in the command line. Check the command line options and the BAM file");
+            System.exit(0);
+        }
+        System.out.println("writing data");
         OutputStream streamOut;
         ObjectOutputStream oos = null;
         try {
@@ -150,20 +176,24 @@ public class Parser {
         }
         System.out.println("Scan took: " + (new SimpleDateFormat("mm:ss:SSS")).format(new Date(System.currentTimeMillis() - starttime)));
         System.out.println("Getting some stats");
-        //added
-        int umiCountGenes = parsedIlluminaData.illuminaGenesData.entrySet().stream().//Entry<String,IlluminaOneGeneData>
-                filter(t -> t!= null).//very likely unnecessary
-                map(x -> x.getValue()).filter(m -> m != null).
-                flatMap(v -> v.entrySet().stream()).//Entry<Long,IlluminaOneGeneOneCellData>
-                map(h -> h.getValue()).filter(y -> y != null).
-                mapToInt( p -> p.size()).sum();
-               // mapToInt(f -> f.getValue() == null ? 0 : f.getValue().size()).sum();
-        System.out.println("Found " + umiCountGenes + " UMIs associated with genes.");
-        if (umiCountGenes == 0) {
-            System.out.println("!!!!!!!! WARNING - NO UMI ASSOCIATED WITH GENES FOUND -- CHECK PARAMETERS !!!!!!");
+        if (parsedIlluminaData.illuminaGenesData.size() == 0) {
+            System.out.println("!!!!!! No SAM record found that has the SAM tags for a gene, cell barcode and UMI provided in the command line. Check the command line options and the BAM file");
+        } else {
+            int umiCountGenes = parsedIlluminaData.illuminaGenesData.entrySet().stream().//Entry<String,IlluminaOneGeneData>
+                    filter(t -> t != null).//very likely unnecessary
+                    map(x -> x.getValue()).filter(m -> m != null).
+                    flatMap(v -> v.entrySet().stream()).//Entry<Long,IlluminaOneGeneOneCellData>
+                    map(h -> h.getValue()).filter(y -> y != null).
+                    mapToInt(p -> p.size()).sum();
+            // mapToInt(f -> f.getValue() == null ? 0 : f.getValue().size()).sum();
+            System.out.println("Found " + umiCountGenes + " UMIs associated with genes.");
+            if (umiCountGenes == 0) {
+                System.out.println("!!!!!!!! WARNING - NO UMI ASSOCIATED WITH GENES FOUND -- CHECK PARAMETERS !!!!!!");
+            }
         }
-        if(errorFlag != 0)
+        if (errorFlag != 0) {
             ParsingErrorFlags.print(errorFlag, System.out);
+        }
         //int umiCountRegions = parsedIlluminaData.illuminaChromosomesData.values().stream().flatMap(x -> x.stream()).
         //       System.out.println("took " + (System.currentTimeMillis() - starttime) / 1000 + " secs\n type enter to exit");
 //        System.out.println("TES reading file");
@@ -329,7 +359,7 @@ public class Parser {
         } catch (IOException ex) {
             Logger.getLogger(Parser.class.getName()).log(Level.SEVERE, null, ex);
         }
-
+        
     }
-
+    
 }

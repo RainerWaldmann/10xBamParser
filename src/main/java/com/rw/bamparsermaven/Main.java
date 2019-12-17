@@ -23,8 +23,8 @@ import org.apache.commons.cli.ParseException;
  */
 public class Main {
     
-    private static final String VERSION = "1.002";
-    private static final String BUILD_DATE = "  Build Dec 13, 2019";
+    private static final String VERSION = "1.002_1";
+    private static final String BUILD_DATE = "  Build Dec 17, 2019";
 
     //private static 
     /**
